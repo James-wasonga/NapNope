@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0d0d14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WakeProof" />
+  <link rel="manifest" href="manifest.json" />
+  <title>WakeProof — Smart Alarm</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============================
+       SCREEN: HOME / SET ALARM
+  ============================= -->
+  <div id="screen-home" class="screen active">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">⏰</span>
+        <span class="logo-text">WakeProof</span>
+      </div>
+      <p class="logo-sub">The alarm that makes sure you're truly awake</p>
+    </header>
+
+    <main class="home-main">
+      <!-- Live clock -->
+      <div class="clock-ring">
+        <div class="clock-face">
+          <div id="live-time" class="live-time">00:00</div>
+          <div id="live-date" class="live-date">Monday, Jan 1</div>
+        </div>
+      </div>
+
+      <!-- Alarm setter card -->
+      <div class="alarm-card">
+        <div class="alarm-card-header">
+          <span class="section-label">SET ALARM</span>
+        </div>
+
+        <!-- Time picker -->
+        <div class="time-picker-row">
+          <div class="time-scroll-col">
+            <button class="scroll-btn" onclick="changeHour(1)">▲</button>
+            <div id="hour-display" class="time-digit">22</div>
+            <button class="scroll-btn" onclick="changeHour(-1)">▼</button>
+          </div>
+          <div class="time-colon">:</div>
+          <div class="time-scroll-col">
+            <button class="scroll-btn" onclick="changeMin(1)">▲</button>
+            <div id="min-display" class="time-digit">00</div>
+            <button class="scroll-btn" onclick="changeMin(-1)">▼</button>
+          </div>
+        </div>
+
+        <!-- Label -->
+        <div class="alarm-label-row">
+          <label class="label-text" for="alarm-label">Label (optional)</label>
+          <input type="text" id="alarm-label" class="label-input" placeholder="e.g. Morning routine" maxlength="30" />
+        </div>
+
+        <!-- WHERE WILL YOU BE? -->
+        <div class="profile-section">
+          <span class="section-label">WHERE WILL YOU BE?</span>
+          <p class="profile-helper">This sets your Step 2 wake challenge</p>
+          <div id="profile-selector" class="profile-grid">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="step2-preview-box">
+            <span class="step2-preview-label">STEP 2 CHALLENGE</span>
+            <div id="step2-preview" class="step2-preview-content">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Challenge summary -->
+        <div class="challenge-summary">
+          <div class="cs-row">
+            <span class="cs-num">1</span>
+            <span class="cs-text">📸 Take a selfie — same always</span>
+          </div>
+          <div class="cs-divider"></div>
+          <div class="cs-row">
+            <span class="cs-num">2</span>
+            <span id="cs-step2-text" class="cs-text">🦷 Photo of your sink area</span>
+          </div>
+        </div>
+
+        <div class="alarm-actions">
+          <button class="btn-set" onclick="setAlarm()">Set Alarm</button>
+        </div>
+      </div>
+
+      <!-- Active alarm bar -->
+      <div id="active-alarm-bar" class="active-alarm-bar hidden">
+        <div class="active-alarm-info">
+          <span class="active-icon">🔔</span>
+          <div>
+            <div id="active-alarm-time-display" class="active-time">22:00</div>
+            <div id="active-alarm-label-display" class="active-label">Alarm set</div>
+          </div>
+        </div>
+        <div class="active-alarm-meta">
+          <div id="active-countdown" class="countdown-text">in 0h 0m</div>
+          <button class="btn-cancel-alarm" onclick="cancelAlarm()">Cancel</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ============================
+       SCREEN: ALARM RINGING
+  ============================= -->
+  <div id="screen-ringing" class="screen">
+    <div class="ringing-bg">
+      <div class="pulse-ring ring1"></div>
+      <div class="pulse-ring ring2"></div>
+      <div class="pulse-ring ring3"></div>
+    </div>
+
+    <div class="ringing-content">
+      <div class="ringing-icon">⏰</div>
+      <div id="ringing-time-display" class="ringing-time">22:00</div>
+      <div id="ringing-label-display" class="ringing-label">Time to wake up!</div>
+
+      <div class="challenge-progress">
+        <div class="progress-step">
+          <div class="prog-dot active" id="dot-1">1</div>
+          <div class="prog-line"></div>
+        </div>
+        <div class="progress-step">
+          <div class="prog-dot" id="dot-2">2</div>
+        </div>
+      </div>
+      <div class="challenge-desc" id="challenge-desc">Complete both challenges to dismiss</div>
+
+      <!-- Step 2 hint badge -->
+      <div class="step2-badge" id="step2-badge">Then: 🦷 Sink photo</div>
+
+      <button class="btn-challenge" id="btn-challenge" onclick="startChallenge()">
+        📸 Take Selfie to Stop Alarm
+      </button>
+
+      <!-- Permanent off — hidden while ringing -->
+      <button class="btn-permanent-off" id="btn-perm-off" onclick="permanentOff()">
+        Turn Off Alarm Permanently
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================
+       SCREEN: CAMERA
+  ============================= -->
+  <div id="screen-camera" class="screen">
+    <div class="camera-header">
+      <button class="btn-back" onclick="closeCameraCancel()">← Back</button>
+      <h2 id="camera-title" class="camera-title">Take a Selfie</h2>
+    </div>
+
+    <div class="camera-body">
+      <div class="camera-frame">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <div class="camera-overlay">
+          <div class="face-guide" id="face-guide"></div>
+        </div>
+        <div id="camera-flash" class="camera-flash hidden"></div>
+        <canvas id="camera-canvas" class="hidden"></canvas>
+      </div>
+
+      <div class="camera-hint" id="camera-hint">Position your face in the oval</div>
+
+      <div id="preview-section" class="hidden">
+        <img id="capture-preview" class="capture-preview" alt="Captured photo" />
+        <div class="preview-actions">
+          <button class="btn-retake" onclick="retakePhoto()">Retake</button>
+          <button class="btn-confirm" onclick="confirmPhoto()">✓ Use This</button>
+        </div>
+      </div>
+
+      <div id="capture-section">
+        <button class="btn-capture" onclick="capturePhoto()">
+          <span class="capture-inner"></span>
+        </button>
+        <div class="camera-switch-row">
+          <button class="btn-flip" onclick="flipCamera()">🔄</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       SCREEN: STEP SUCCESS
+  ============================= -->
+  <div id="screen-success" class="screen">
+    <div class="success-content">
+      <div class="success-anim">✅</div>
+      <h2 id="success-title" class="success-title">Selfie Verified!</h2>
+      <p id="success-subtitle" class="success-subtitle">Now complete step 2.</p>
+      <button class="btn-next-challenge" id="btn-next" onclick="proceedToNextChallenge()">
+        Continue →
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================
+       SCREEN: FULLY DISMISSED
+  ============================= -->
+  <div id="screen-done" class="screen">
+    <div class="done-content">
+      <div class="done-emoji">🌅</div>
+      <h2 class="done-title">You're Fully Awake!</h2>
+      <p class="done-subtitle">Alarm dismissed. Have a great day!</p>
+      <div class="done-stats">
+        <div class="stat-box">
+          <span class="stat-val" id="stat-challenges">2</span>
+          <span class="stat-lbl">Challenges</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="stat-time">0m</span>
+          <span class="stat-lbl">To Dismiss</span>
+        </div>
+      </div>
+      <button class="btn-home" onclick="goHome()">Set Another Alarm</button>
+    </div>
+  </div>
+
+  <!-- ============================
+       MODALS
+  ============================= -->
+  <div id="modal-perm" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">📷</div>
+      <h3>Camera Permission Needed</h3>
+      <p>WakeProof needs camera access to verify you're awake. Please allow camera in your browser settings and reload.</p>
+      <button class="btn-modal-ok" onclick="closeModal('modal-perm')">Got it</button>
+    </div>
+  </div>
+
+  <div id="modal-existing" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <h3>Alarm Already Set</h3>
+      <p>Cancel your active alarm before setting a new one.</p>
+      <button class="btn-modal-ok" onclick="closeModal('modal-existing')">OK</button>
+    </div>
+  </div>
+
+  <div id="modal-perm-off" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-icon">🔕</div>
+      <h3>Permanently Turn Off?</h3>
+      <p>This disables the alarm entirely — not a snooze. Only use if you truly don't need this alarm anymore.</p>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal('modal-perm-off')">No, keep it</button>
+        <button class="btn-modal-confirm" onclick="confirmPermanentOff()">Yes, turn off</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
