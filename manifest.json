@@ -1,6 +1,6 @@
 {
-  "name": "WakeProof — Smart Alarm",
-  "short_name": "WakeProof",
+  "name": "NapNope — Smart Alarm",
+  "short_name": "NapNope",
   "description": "A smart alarm that forces you to prove you're awake with a selfie and sink photo before dismissing.",
   "start_url": "./index.html",
   "display": "standalone",
