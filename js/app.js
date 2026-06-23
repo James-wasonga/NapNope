@@ -1,5 +1,5 @@
 /* =============================================
-   WakeProof — App Logic v2
+   NapNope — App Logic v2
    Smart alarm with location-aware challenges
 ============================================= */
 
